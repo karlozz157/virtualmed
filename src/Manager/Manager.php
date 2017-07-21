@@ -14,14 +14,13 @@ class Manager implements ManagerInterface
 
     public function __construct()
     {
-        /*$managerName = Config::getParam('manager');
-        $class = sprintf('%s\\%s', __NAMESPACE__, $managerName);
+        $manager = sprintf('%s\\%s', __NAMESPACE__, Config::getParam('manager'));
 
-        if (!class_exists($class)) {
-            throw new \Exception(sprintf('Lo siento el manager %s no existe!', $class));
-        }*/
+        if (!class_exists($manager)) {
+            throw new \Exception(sprintf('Lo siento el manager %s no existe!', $manager));
+        }
 
-        $this->manager = new MongoManager();
+        $this->manager = new $manager();
     }
 
     /**
