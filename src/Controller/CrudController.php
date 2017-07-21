@@ -11,7 +11,7 @@ class CrudController extends Controller
      */
     public function indexAction()
     {
-        return $this->manager->findAll($this->entityName);
+        return $this->getManager()->findAll($this->entityName);
     }
 
     /**
@@ -20,7 +20,7 @@ class CrudController extends Controller
     public function postAction()
     {
         $entity = new $this->entityName($this->request->json());
-        $this->manager->persist($entity);
+        $this->getManager()->persist($entity);
 
         return $entity;
     }
@@ -36,8 +36,8 @@ class CrudController extends Controller
     public function deleteAction()
     {
         $id = $this->request->query('id');
-        $entity = $this->manager->findOne($this->entityName, ['_id' => new \MongoId($id)]);
-        $this->manager->remove($entity);
+        $entity = $this->getManager()->findOne($this->entityName, ['_id' => new \MongoId($id)]);
+        $this->getManager()->remove($entity);
 
         return $entity;
     }

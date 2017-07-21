@@ -1,21 +1,26 @@
 <?php
 
-namespace Virtualmed\Http;
+namespace Virtualmed\Http\Response\Adapter;
 
 use Virtualmed\Entity\AbstractEntity;
 
-class Response
+class JsonResponse extends AdapterResponse
 {
+    public function __construct()
+    {
+        $this->addHeader('Content-Type', 'application/json');
+    }
+
     /**
      * @param mixed $data
      */
-    public function json($data)
+    public function dispatchResponse($data)
     {
-        header('Content-type: application/json');
-
         $results = [];
 
-        if ($data instanceof AbstractEntity) {
+        if (!is_array($data)) {
+            $results = [$data];
+        } elseif ($data instanceof AbstractEntity) {
             $results = $data->toArray();
         } else {
             foreach ($data as $key => $entity) {
@@ -28,6 +33,5 @@ class Response
         }
 
         echo json_encode($results);
-        exit;
     }
 }

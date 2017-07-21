@@ -2,58 +2,88 @@
 
 namespace Virtualmed\Http;
 
+use Virtualmed\Http\Response\Adapter\JsonResponse;
+use Virtualmed\Http\Response\Response;
+use Virtualmed\Http\Request;
+
 class Router
 {
     /**
      * @const string
      */
     const ARROBA = '@';
+    const CONTROLLER_NAMESPACE = 'Virtualmed\\Controller';
 
     /**
      * @const int
      */
     const CONTROLLER = 0;
-    const ACTION     = 1;
+    const ACTION = 1;
 
     /**
-     * @param string $pathName
-     * @param string $controllerAndAction
+     * @var Response $response
      */
-    public static function route($pathName, $controllerAndAction)
-    {   
-        $path = $_SERVER['PATH_INFO'];
+    protected $response;
 
-        if ($path !== $pathName) {
-            return;
-        }
-
-        $exploded = explode(self::ARROBA, $controllerAndAction);
-        $controllerName = $exploded[self::CONTROLLER];
-        $actionName = $exploded[self::ACTION];
-
-        static::dispatch($controllerName, $actionName);
+    public function __construct()
+    {
+        $this->response = new Response(new JsonResponse());
     }
 
     /**
-     * @param string $controllerName
-     * @param string $actionName
+     * @param string $route
+     * @param string $resource
      */
-    protected static function dispatch($controllerName, $actionName)
+    public function route($route, $resource)
     {
-        $controller = sprintf('Virtualmed\\Controller\\%sController', ucfirst($controllerName));
+        $pathInfo = $_SERVER['PATH_INFO'];
 
-        if (!class_exists($controller)) {
-            throw new \Exception(sprintf('The %s controller doesnt\'t exist!', $controllerName));
+        if ($pathInfo !== $route) {
+            return;
         }
 
-        $controller = new $controller();
-        $action = sprintf('%sAction', $actionName);
+        $resource = explode(self::ARROBA, $resource);
+        $this->dispatch($resource[self::CONTROLLER], $resource[self::ACTION]);
+    }
 
-        if (!method_exists($controller, $action)) {
-            throw new \Exception(sprintf('The %s controller doesn\'t have the %s action!', $controller, $action));
+    /**
+     * @param string $controller
+     * @param string $action
+     */
+    protected function dispatch($controller, $action)
+    {
+        $controller = sprintf('%s\\%s', self::CONTROLLER_NAMESPACE, ucfirst($controller));
+
+        if (!$this->classExists($controller)) {
+            throw new \Exception(sprintf('The %s doesnt\'t exist!', $controller));
         }
 
-        $response = $controller->$action();
-        $controller->getResponse()->json($response);
+        if (!$this->actionExists($controller, $action)) {
+            throw new \Exception(sprintf('The %s controller doesn\'t have %s action!', $controller, $action));
+        }
+
+        $controller = new $controller(new Request());
+        $this->response->sendResponse($controller->$action());
+    }
+
+    /**
+     * @param string $controller
+     *
+     * @return boolean
+     */
+    private function classExists($controller)
+    {
+        return in_array($controller, get_declared_classes())  || class_exists($controller);
+    }
+
+    /**
+     * @param string $controller
+     * @param string $action
+     *
+     * @return boolean
+     */
+    private function actionExists($controller, $action)
+    {
+        return in_array($action, get_class_methods($controller));
     }
 }

@@ -3,7 +3,6 @@
 namespace Virtualmed\Controller;
 
 use Virtualmed\Http\Request;
-use Virtualmed\Http\Response;
 use Virtualmed\Manager\Manager;
 
 abstract class Controller
@@ -11,6 +10,7 @@ abstract class Controller
     /**
      * @const string
      */
+    const CLASS_MANAGER = 'Virtualmed\\Manager\\%sManager';
     const DEFAULT_MANAGER = 'Virtualmed\\Manager\\Manager';
 
     /**
@@ -26,34 +26,37 @@ abstract class Controller
     /**
      * @var Manager $manager
      */
-    protected $manager;
+    private $manager;
 
-    public function __construct()
+    /**
+     * @var Request $request
+     */
+    protected $request;
+
+    /**
+     * @param Request $request
+     */
+    public function __construct(Request $request)
     {
         $class = end(explode('\\', get_class($this)));
         $this->class = str_replace('Controller', '', $class);
         $this->entityName = 'Virtualmed\\Entity\\' . $this->class;
-        $this->manager = $this->getManager();
-        $this->request = new Request();
-        $this->response = new Response();
+        $this->request = $request;
     }
 
     /**
      * @return Manager
      */
-    private function getManager()
+    protected function getManager()
     {
-        $entityManager = sprintf('Virtualmed\\Manager\\%sManager', $this->class);
+        if (!is_null($this->manager)) {
+            return $this->manager;
+        }
+
+        $entityManager = sprintf(self::CLASS_MANAGER, $this->class);
         $manager = class_exists($entityManager) ? $entityManager : self::DEFAULT_MANAGER;
+        $this->manager = new $manager();
 
-        return new $manager();
-    }
-
-    /**
-     * @return Response
-     */
-    public function getResponse()
-    {
-        return $this->response;
+        return $this->manager;
     }
 }
