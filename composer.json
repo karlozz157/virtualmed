@@ -1,7 +1,9 @@
 {
-    "name": "emily/virtualmed",
+    "name":"Emily",
+    "homepage":"https://github.com/karlozz157/virtualmed",
+    "license":"MIT",
     "require": {
-        "php": "^5.3.3 || ^7.0"
+        "php": "<=5.5"
     },
     "autoload": {
         "psr-4": {"Virtualmed\\": "src/"}
