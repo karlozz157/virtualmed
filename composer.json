@@ -1,11 +1,20 @@
 {
-    "name":"Emily",
+    "name":"karlozz157/emily",
     "homepage":"https://github.com/karlozz157/virtualmed",
     "license":"MIT",
+    "authors": [
+        {
+            "name": "carlos romero",
+            "email": "karlozz157@gmail.com",
+            "role": "albañil"
+        }
+    ],
     "require": {
-        "php": "<=5.5"
+        "php": ">=5.5"
     },
     "autoload": {
-        "psr-4": {"Virtualmed\\": "src/"}
+        "psr-4": {
+            "Virtualmed": "src"
+        }
     }
 }
